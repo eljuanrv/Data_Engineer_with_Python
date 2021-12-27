@@ -22,3 +22,28 @@ Offers
 - Databases: AWS RDS, Azures SQL Database, Google Cloud SQL 
 
 ### Databases
+They are usually a large collection of data organized especially for rapid search and retrieval
+- Structured Data (tabular data)
+- Semistructured Data (JSON)
+- Unstructured Data (Videos)
+- SQL
+- NoSQL 
+
+How to query a SQL Database Using Pandas
+``` 
+import pandas as pd
+
+# Complete the SELECT statement
+data = pd.read_sql("""
+SELECT first_name, last_name FROM "Customer"
+ORDER BY last_name, first_name
+""", db_engine)
+
+# Show the first 3 rows of the DataFrame
+print(data.head(3))
+
+# Show the info of the DataFrame
+print(data.info()) 
+```
+Es solo un ejemplo
+
