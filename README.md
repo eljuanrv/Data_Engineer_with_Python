@@ -28,8 +28,16 @@ They are usually a large collection of data organized especially for rapid searc
 - Unstructured Data (Videos)
 - SQL
 - NoSQL 
-
+Example
 How to query a SQL Database Using Pandas
+
+Instructions
+
+- Complete the SELECT statement so it selects the first_name and the last_name in the "Customer" table. 
+- Make sure to order by the last name first and the first name second.
+- Use the .head() method to show the first 3 rows of data.
+- Use .info() to show some general information about data.
+
 ``` 
 import pandas as pd
 
@@ -46,4 +54,37 @@ print(data.head(3))
 print(data.info()) 
 ```
 Es solo un ejemplo
+
+
+Example 2
+
+Complete the SELECT statement, so it joins the "Customer" with the "Order" table.
+Print the id column of data. What do you see?
+
+```
+# Complete the SELECT statement
+data = pd.read_sql("""
+SELECT * FROM "Customer"
+INNER JOIN "Order"
+ON "Order"."customer_id"="Customer"."id"
+""", db_engine)
+
+# Show the id column of data
+print(data.id)
+```
+
+### Parallel Computing
+
+Example 1
+```
+from multiprocessing import Pool
+import pandas as pd
+
+def take_mean_age(year_and_group):
+	year, group = year_and_group
+	return pd.Dataframe({"Age":group["Age"].mean()}, index=[year])
+
+with Pool(4) as p:
+	results = p.map(take_mean_age, athlete_events.groupby("Year"))
+```
 
