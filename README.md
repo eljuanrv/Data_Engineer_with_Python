@@ -20,3 +20,5 @@ Offers
 - Storage: AWS S3, Azure Blob Storage, Google Cloud Storage
 - Computation: AWS AC2, Azure Virtual Machines, Google Compute Engine
 - Databases: AWS RDS, Azures SQL Database, Google Cloud SQL 
+
+### Databases
