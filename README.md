@@ -87,6 +87,8 @@ def take_mean_age(year_and_group):
 
 with Pool(4) as p:
 	results = p.map(take_mean_age, athlete_events.groupby("Year"))
+	
+result_df=pd.concat(results)
 ```
 Example 2
 *dask*
