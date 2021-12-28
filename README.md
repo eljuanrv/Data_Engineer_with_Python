@@ -76,6 +76,7 @@ print(data.id)
 ### Parallel Computing
 
 Example 1
+*multiprocessing.Pool*
 ```
 from multiprocessing import Pool
 import pandas as pd
@@ -87,4 +88,16 @@ def take_mean_age(year_and_group):
 with Pool(4) as p:
 	results = p.map(take_mean_age, athlete_events.groupby("Year"))
 ```
+Example 2
+*dask*
+```
+import dask.dataframe as dd
+
+# Partition dataframe into 4
+athlete_events_dask = dd.from_pandas(athlete_events, npartitions = 4)
+
+#Run parallel computations on each partition
+result_df = athlete_events_dask.groupby("Year").Age.mean().compute()
+```
+
 
