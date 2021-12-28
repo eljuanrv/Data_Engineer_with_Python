@@ -282,4 +282,14 @@ ingest_customer_data.set_downstream(enrich_customer_data)
 ingest_product_data.set_downstream(enrich_customer_data)
 ```
 
+Exercise 
+
+Airflow DAGs
+In Airflow, a pipeline is represented as a Directed Acyclic Graph or DAG. The nodes of the graph represent tasks that are executed. The directed connections between nodes represent dependencies between the tasks.
+
+Representing a data pipeline as a DAG makes much sense, as some tasks need to finish before others can start. You could compare this to an assembly line in a car factory. The tasks build up, and each task can depend on previous tasks being finished. A fictional DAG could look something like this:
+
+Example DAG
+
+Assembling the frame happens first, then the body and tires and finally you paint. Let's reproduce the example above in code.
 
