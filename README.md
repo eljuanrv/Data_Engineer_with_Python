@@ -291,5 +291,29 @@ Representing a data pipeline as a DAG makes much sense, as some tasks need to fi
 
 Example DAG
 
+![Descripcion](https://assets.datacamp.com/production/repositories/5000/datasets/44f52c1b25308c762f24dcde116b62e275ce7fe1/DAG.png)
+
 Assembling the frame happens first, then the body and tires and finally you paint. Let's reproduce the example above in code.
+
+- First, the DAG needs to run on every hour at minute 0. Fill in the schedule_interval keyword argument using the crontab notation. For example, every hour at minute N would be N * * * *. Remember, you need to run at minute 0.
+- The downstream flow should match what you can see in the image above. The first step has already been filled in for you.
+
+```
+# Create the DAG object
+dag = DAG(dag_id="car_factory_simulation",
+          default_args={"owner": "airflow","start_date": airflow.utils.dates.days_ago(2)},
+          schedule_interval="0 * * * *")
+
+# Task definitions
+assemble_frame = BashOperator(task_id="assemble_frame", bash_command='echo "Assembling frame"', dag=dag)
+place_tires = BashOperator(task_id="place_tires", bash_command='echo "Placing tires"', dag=dag)
+assemble_body = BashOperator(task_id="assemble_body", bash_command='echo "Assembling body"', dag=dag)
+apply_paint = BashOperator(task_id="apply_paint", bash_command='echo "Applying paint"', dag=dag)
+
+# Complete the downstream flow
+assemble_frame.set_downstream(place_tires)
+assemble_frame.set_downstream(assemble_body)
+assemble_body.set_downstream(apply_paint)
+```
+
 
