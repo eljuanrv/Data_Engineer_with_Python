@@ -38,7 +38,7 @@ Instructions
 - Use the .head() method to show the first 3 rows of data.
 - Use .info() to show some general information about data.
 
-``` 
+```Python
 import pandas as pd
 
 # Complete the SELECT statement
@@ -61,7 +61,7 @@ Example 2
 Complete the SELECT statement, so it joins the "Customer" with the "Order" table.
 Print the id column of data. What do you see?
 
-```
+```Py
 # Complete the SELECT statement
 data = pd.read_sql("""
 SELECT * FROM "Customer"
@@ -77,7 +77,7 @@ print(data.id)
 
 Example 1
 *multiprocessing.Pool*
-```
+```Py
 from multiprocessing import Pool
 import pandas as pd
 
@@ -92,7 +92,7 @@ result_df=pd.concat(results)
 ```
 Example 2
 *dask*
-```
+```Py
 import dask.dataframe as dd
 
 # Partition dataframe into 4
@@ -115,7 +115,7 @@ Instructions
 
 Complete the code, so you apply take_mean_age with 1 core first, then 2 and finally 4 cores.
 
-```
+```Py
 # Function to apply a function over multiple cores
 @print_timing
 def parallel_apply(apply_func, groups, nb_cores):
@@ -146,7 +146,7 @@ The pandas DataFrame, athlete_events, is available in your workspace.
 If you forgot the parameters of dd.from_pandas(), check out the slides again, or type help(dd.from_pandas) in the console!
 
 - Print out the mean age for each Year. Remember dask uses lazy evaluation.
-```
+```Py
 import dask.dataframe as dd
 
 # Set the number of partitions
@@ -163,7 +163,7 @@ print(athlete_events_dask.groupby('Year').Age.mean().compute())
 - HDFS: Distributed file sistem like my computer but the files reside in several computers
 - Hive: Solve the MapReduce problem (Hive SQL)
 example of Hive query
-```
+```SQL
 SELECT year, AVG(age)
 FROM views.athlete_events
 GROUP BY year
@@ -182,7 +182,7 @@ This example can be executed by a cluster of computers
 - *PySpark*: Interfaz programming language to spark (Dataframe abstractions and similar to pandas)
 
 *Example PySpark*
-```
+```Py
 (athlete_events_spark
 	.groupBy('Year')
 	.mean('Age')
@@ -212,7 +212,7 @@ Instructions
 2. Find out the schema of athlete_events_spark.
 3. Print out the mean age of the Olympians, grouped by year. Notice that spark has not actually calculated anything yet. You can call this lazy evaluation.
 4. Take the previous result, and call .show() on the result to calculate the mean age.
-```
+```Py
 # Print the type of athlete_events_spark
 print(type(athlete_events_spark))
 
@@ -232,11 +232,11 @@ Running PySpark files
 In this exercise, you're going to run a PySpark file using spark-submit. This tool can help you submit your application to a spark cluster.
 
 For the sake of this exercise, you're going to work with a local Spark instance running on 4 threads. The file you need to submit is in /home/repl/spark-script.py. Feel free to read the file:
-```
+```Py
 cat /home/repl/spark-script.py
 ```
 You can use spark-submit as follows:
-```
+```Py
 spark-submit \
   --master local[4] \
   /home/repl/spark-script.py
@@ -265,7 +265,7 @@ Orchestrate jobs using pipelines
 primero debe ocurrir *1* despues *2 y 3* y hasta el fnal *4*
 
 *Example in code*
-```
+```Py
 # Create the DAG object
 dag = DAG(dag_id = 'example_dag', ..., schedule_interval = '0 * * * *')
 
@@ -298,7 +298,7 @@ Assembling the frame happens first, then the body and tires and finally you pain
 - First, the DAG needs to run on every hour at minute 0. Fill in the schedule_interval keyword argument using the crontab notation. For example, every hour at minute N would be N * * * *. Remember, you need to run at minute 0.
 - The downstream flow should match what you can see in the image above. The first step has already been filled in for you.
 
-```
+```Py
 # Create the DAG object
 dag = DAG(dag_id="car_factory_simulation",
           default_args={"owner": "airflow","start_date": airflow.utils.dates.days_ago(2)},
