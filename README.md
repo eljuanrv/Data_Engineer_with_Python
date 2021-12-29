@@ -322,7 +322,7 @@ Is extracting data from persistent storage that is not ready for analisis for ex
 - Data on Databases: (Aplications Databases are optimized to allow lots of transactions OLTP, ROW oriented), (Analytical Databases are aptimized for analisis OLAP COLUMN oriented)
 - Conection String: is a conection that has information of how to conect to a database 
 
-*Example of conection with Python*
+**Example of conection with a Database using Python**
 ```Py
 import sqlalchemy
 import pandas as pd
@@ -333,5 +333,69 @@ db_engine = sqlalchemy.create_engine(conection_url)
 pd.read_sql("SELECT * FROM customer", db_engine)
 ```
 
+**Example of conection with an API using Python**
+```Py
+import requests
 
+response = requests.get('https://hackerlink.json')
+print(response.json())
+```
 
+**Exercise 1: Fetch from an API**
+
+In the last video, you've seen that you can extract data from an API by sending a request to the API and parsing the response which was in JSON format. In this exercise, you'll be doing the same by using the requests library to send a request to the Hacker News API.
+
+Hacker News is a social news aggregation website, specifically for articles related to computer science or the tech world in general. Each post on the website has a JSON representation, which you'll see in the response of the request in the exercise.
+
+Instructions
+
+1. Use the requests module to get the Hacker News post's JSON object.
+2. Print out the response, parsed as a JSON.
+3. Parsing as JSON again, assign the "score" key of the post to post_score.
+
+```Py
+import requests
+
+# Fetch the Hackernews post
+resp = requests.get("https://hacker-news.firebaseio.com/v0/item/16222426.json")
+
+# Print the response parsed as JSON
+print(resp.json())
+
+# Assign the score of the test to post_score
+post_score = resp.json()["score"]
+print(post_score)
+```
+
+**Exercise 1: Read from a database**
+
+In this exercise, you're going to extract data that resides inside tables of a local PostgreSQL database. The data you'll be using is the Pagila example database. The database backs a fictional DVD store application, and educational resources often use it as an example database.
+
+You'll be creating and using a function that extracts a database table into a pandas DataFrame object. The tables you'll be extracting are:
+
+- film: the films that are rented out in the DVD store.
+- customer: the customers that rented films at the DVD store.
+In order to connect to the database, you'll have to use a PostgreSQL connection URI, which looks something like this:
+```Py
+"postgresql://[user[:password]@][host][:port][/database]"
+```
+- Complete the extract_table_to_pandas() function definition to include the tablename argument within the query.
+- Fill in the connection URI. The username and password are repl and password, respectively. The host is localhost and port is 5432. The database is pagila.
+- Complete the function calls of extract_table_to_pandas() to extract the film and customer tables.
+
+```Py
+# Function to extract table to a pandas DataFrame
+def extract_table_to_pandas(tablename, db_engine):
+    query = "SELECT * FROM {}".format(tablename)
+    return pd.read_sql(query, db_engine)
+
+# Connect to the database using the connection URI
+connection_uri = "postgresql://repl:password@localhost:5432/pagila" 
+db_engine = sqlalchemy.create_engine(connection_uri)
+
+# Extract the film table into a pandas DataFrame
+extract_table_to_pandas("film", db_engine)
+
+# Extract the customer table into a pandas DataFrame
+extract_table_to_pandas("customer", db_engine)
+```
