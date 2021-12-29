@@ -315,5 +315,23 @@ assemble_frame.set_downstream(place_tires)
 assemble_frame.set_downstream(assemble_body)
 assemble_body.set_downstream(apply_paint)
 ```
+### Extract Data
+Is extracting data from persistent storage that is not ready for analisis for example (*file, database or API*)
+- Text files: csv or others, JSON
+- Data OOn The Web through APIs: Request for Data and you get a response 
+- Data on Databases: (Aplications Databases are optimized to allow lots of transactions OLTP, ROW oriented), (Analytical Databases are aptimized for analisis OLAP COLUMN oriented)
+- Conection String: is a conection that has information of how to conect to a database 
+
+*Example of conection with Python*
+```Py
+import sqlalchemy
+import pandas as pd
+
+conection_url = 'postgresql://repl:password@localhost:5432/pagila'
+db_engine = sqlalchemy.create_engine(conection_url)
+
+pd.read_sql("SELECT * FROM customer", db_engine)
+```
+
 
 
