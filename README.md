@@ -609,3 +609,29 @@ film_pdf_joined.to_sql("film", db_engine_dwh, schema="store", if_exists="replace
 # Run the query to fetch the data
 pd.read_sql("SELECT film_id, recommended_film_ids FROM store.film", db_engine_dwh)
 ```
+### Putting It All Together
+
+#### The ETL Function
+
+
+```Py
+def extract_table_to_df(tablename, db_engine):
+	return pd.read_sql('SELECT * FROM {}'.format(tablename), db_engine)
+
+def split_columns_transform(df, column, pat, suffixes):
+	#converts column into str and splits it on pat...
+
+def load_df_into_dwh(film_df, tablename, schema, db_engine):
+	return pd.to_sql(tablename, db_engine, schema = schema, if_exists = 'replace')
+
+db_engines = { ... } #Needs to be configured
+def etl():
+	#extract
+	film_df = extract_table_to_df('film', db_engines['store'])
+	# transform
+	film_df = split_columns_transform(film_df, 'rental_rate', '.', ['_dollar', '_cents'])
+	#load
+	load_df_into_dwh(film_df, 'film', 'store', db_engines['dwh'])
+```	
+
+#### Arflow Refresher
