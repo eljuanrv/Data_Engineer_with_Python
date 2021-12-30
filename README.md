@@ -399,3 +399,83 @@ extract_table_to_pandas("film", db_engine)
 # Extract the customer table into a pandas DataFrame
 extract_table_to_pandas("customer", db_engine)
 ```
+
+### Transform
+**Example 1 of transform using Python**
+```Py
+import pandas as pd
+
+customer_df #pandas dataframe with customer data
+
+#split email column into 2 columns on the '@' symbol
+split_email = customer_df.email.str.split('@', expand = True)
+#at this point, split_email will have two columns, a first
+# one with everything before @, and a second one with
+# everything after @
+
+# create 2 new columns using the resulting DataFrame
+customer_df = customer_df.assign(
+	username = split_email[0],
+	domain = split_email[1],
+	)
+	
+```
+**Example 2 of transform using PySpark**
+1. The extract phase needs to load the table into spark and use JDBC, JDBC is a piece of software that helps Spark connect with several sql databases
+2. Put the autorization information in the properties aRGUMENT
+3. Write the name of the table in the second argument
+```Py
+import pyspark.sql
+
+spark = pyspark.sql.SparkSession.builder.getOrCreate()
+
+spark.read.jdbc("jdbc:postgresql://localhost:5432/pagila",#jdbc 
+	'customer',#name of the table
+	properties = {
+		'user':'repl',
+		'password':'password'})#autorization information
+``` 
+
+**Example 3 join using PySpark**
+```Py
+import pyspark.sql
+
+customer_df # PySpark DataFrame with customer data
+ratings_df # PySpark Dataframe with ratings data
+
+#Groupby ratings
+ratings_per_customer = ratings_df.groupBy('customer_id').mean('rating')
+
+#Join on customer ID
+customer_df.join(
+	ratings_per_customer,
+	customer_df.customer_id == ratings_per_customer.customer_id)
+``` 
+**Exercise 1: Splitting the rental rate**
+
+In the video exercise, you saw how to use pandas to split the email address column of the film table in order to extract the users' domain names. Suppose you would want to have a better understanding of the rates users pay for movies, so you decided to divide the rental_rate column into dollars and cents.
+
+In this exercise, you will use the same techniques used in the video exercises to do just that! The film table has been loaded into the pandas DataFrame film_df. Remember, the goal is to split up the rental_rate column into dollars and cents.
+
+Instructions
+
+- Use the .astype() method to convert the rental_rate column into a column of string objects, and assign the results to rental_rate_str.
+- Split rental_rate_str on '.' and expand the results into columns. Assign the results to rental_rate_expanded.
+- Assign the newly created columns into films_df using the column names rental_rate_dollar and rental_rate_cents respectively, setting them to the expanded version using the appropriate index.
+```Py 
+# Get the rental rate column as a string
+rental_rate_str = film_df.rental_rate.astype("str")
+
+# Split up and expand the column
+rental_rate_expanded = rental_rate_str.str.split(".", expand=True)
+
+# Assign the columns to film_df
+film_df = film_df.assign(
+    rental_rate_dollar=rental_rate_expanded[0],
+    rental_rate_cents=rental_rate_expanded[1]
+)
+``` 
+
+
+
+
