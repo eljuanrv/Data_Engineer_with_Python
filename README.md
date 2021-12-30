@@ -499,3 +499,113 @@ film_df_with_ratings = film_df.join(
 # Show the 5 first results
 print(film_df_with_ratings.show(5))
 ``` 
+
+### LOAD
+
+#### Analytics Databases
+- Complex aggregate queries 
+- OLAP
+
+#### Applications Databases
+- Lots of transactiones per second
+- OLTP
+
+#### Row oriented database
+- Store data per record
+- Addes per transaction 
+
+#### Column Oriente database
+- Store data per column
+- Queries: small subsets of columns in a table
+- lend themselves better for parallelization 
+
+#### MPP Databases (Massively Prallel Processing Databases)
+- They are often the objective at the end of a ETL proces
+- Column oriented databases
+- Optimized for analytics
+- Run in a distributed fashion, queries are not executed in a single compute node
+- Examples: Amazon Redshift, Azure SQL Data Warehouse, Google BigQuery
+
+CSV files are not a good option for this pporpuse
+- We often use a format call Parquet, there are several packages that hel to writ ethis kind of files
+
+**An example Redshift**
+```Py
+# Pandas .to_parquet() method
+df.to_parquet(".hjdcbhsbstring")
+
+# PySpark .write.parquet() method
+df.write.parquet("saknjncjscnstring")
+``` 
+you can conect to Redshift using a PostgreeSQL conection URL and copy the data from S3 into Redshift like this
+```SQL
+COPY customer 
+FROM 'skassasstring'
+FORMAT as parquet
+``` 
+** Example of how to load into PostgreeSQL **
+```Py
+# Transformation on data
+recommendations = transform_find_recommendations(ratings_df)
+
+# Load into PostgreSQL database
+recommendations.to_sql(
+			'recommendations',
+			db_engine,
+			schema = 'store',
+			if_exists = 'replace')
+``` 
+
+**Exercise 1: Writing to a file**
+
+In the video, you saw that files are often loaded into a MPP database like Redshift in order to make it available for analysis.
+
+The typical workflow is to write the data into columnar data files. These data files are then uploaded to a storage system and from there, they can be copied into the data warehouse. In case of Amazon Redshift, the storage system would be S3, for example.
+
+The first step is to write a file to the right format. For this exercises you'll choose the Apache Parquet file format.
+
+There's a PySpark DataFrame called film_sdf and a pandas DataFrame called film_pdf in your workspace.
+
+Instructions
+
+- Write the pandas DataFrame film_pdf to a parquet file called "films_pdf.parquet".
+- Write the PySpark DataFrame film_sdf to a parquet file called "films_sdf.parquet".
+```Py
+# Write the pandas DataFrame to parquet
+film_pdf.to_parquet("films_pdf.parquet")
+
+# Write the PySpark DataFrame to parquet
+film_sdf.write.parquet("films_sdf.parquet")
+```
+
+**Exercise 2: Load Into Posgres**
+
+In this exercise, you'll write out some data to a PostgreSQL data warehouse. That could be useful when you have a result of some transformations, and you want to use it in an application.
+
+For example, the result of a transformation could have added a column with film recommendations, and you want to use them in your online store.
+
+There's a pandas DataFrame called film_pdf in your workspace.
+
+As a reminder, here's the structure of a connection URI for sqlalchemy:
+```Py
+'postgresql://[user[:password]@][host][:port][/database]'
+```
+Instructions
+
+- Complete the connection URI for to create the database engine. The user and password are repl and password respectively. The host is localhost, and the port is 5432. - This time, the database is dwh.
+- Finish the call so we use the "store" schema in the database. If the table exists, replace it completely.
+
+```Py
+# Finish the connection URI
+connection_uri = "postgresql://repl:password@localhost:5432/dwh"
+db_engine_dwh = sqlalchemy.create_engine(connection_uri)
+
+# Transformation step, join with recommendations data
+film_pdf_joined = film_pdf.join(recommendations)
+
+# Finish the .to_sql() call to write to store.film
+film_pdf_joined.to_sql("film", db_engine_dwh, schema="store", if_exists="replace")
+
+# Run the query to fetch the data
+pd.read_sql("SELECT film_id, recommended_film_ids FROM store.film", db_engine_dwh)
+```
