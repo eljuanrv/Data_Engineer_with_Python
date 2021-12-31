@@ -725,4 +725,80 @@ Nicely done! Be sure to experiment with a few queries once the data pipeline has
 pd.read_sql('SELECT rating, AVG(rental_duration) FROM film GROUP BY rating ORDER BY AVG', db_engine)
 ```
 
+**Exercise 2: Setting up Airflow**
+
+In this exercise, you'll learn how to add a DAG to Airflow. To the right, you have a terminal at your disposal. The workspace comes with Airflow pre-configured, but it's [ easy to install on your own.](https://airflow.apache.org/start.html)
+
+You'll need to move the *dag.py* file containing the DAG you defined in the previous exercise to, the DAGs folder. Here are the steps to find it:
+
+The airflow home directory is defined in the ```AIRFLOW_HOME``` environment variable. Type ```echo $AIRFLOW_HOME``` to find out.
+In this directory, find the ```airflow.cfg``` file. Use ```head``` to read the file, and find the value of the ```dags_folder```.
+Now you can find the folder and move the ```dag.py``` file there: ```mv ./dag.py <dags_folder>```.
+
+Which files does the DAGs folder have after you moved the file?
+
+Instructions                                                            
+- It has two DAG files: dag.py and dag_recommendations.py.
+
+### Curse Ratings
+
+**Course Table columns**
+- course_id
+- title
+- description
+- programming_language
+
+**Rating Table Columns**
+- user_id
+- course_id *Is a foreign kkey to the courses table*
+- rating *one to five start rating*
+
+**Exercise 1: Querying the table**
+Now that you have a grasp of what's happening in the datacamp_application database, let's go ahead and write up a query for that database.
+
+The goal is to get a feeling for the data in this exercise. You'll get the rating data for three sample users and then use a predefined helper function, print_user_comparison(), to compare the sets of course ids these users rated.
+
+Instructions
+
+- Complete the connection URI. The database is called datacamp_application. The host is localhost with port 5432. The username is repl and the password is password.
+- Select the ratings of users with id: 4387, 18163 and 8770.
+- Fill in print_user_comparison() with the three users you selected.
+```Py
+# Complete the connection URI
+connection_uri = "postgresql://repl:password@localhost:5432/datacamp_application" 
+db_engine = sqlalchemy.create_engine(connection_uri)
+
+# Get user with id 4387
+user1 = pd.read_sql("SELECT * FROM rating WHERE user_id = 4387", db_engine)
+
+# Get user with id 18163
+user2 = pd.read_sql("SELECT * FROM rating WHERE user_id = 18163", db_engine)
+
+# Get user with id 8770
+user3 = pd.read_sql("SELECT * FROM rating WHERE user_id = 8770", db_engine)
+
+# Use the helper function to compare the 3 users
+print_user_comparison(user1, user2, user3)
+```
+
+
+**Exercise 2: Average rating per course**
+
+A great way to recommend courses is to recommend top-rated courses, as DataCamp students often like courses that are highly rated by their peers.
+
+In this exercise, you'll complete a transformation function transform_avg_rating() that aggregates the rating data using the pandas DataFrame's .groupby() method. The goal is to get a DataFrame with two columns, a course id and its average rating:
+|---------------------------|
+|course_id   |	avg_rating  |
+|123	     |	4.72	    |
+|111	     |	4.62        |
+|…	     |	…	    |
+|---------------------------|
+
+In this exercise, you'll complete this transformation function, and apply it on raw rating data extracted via the helper function extract_rating_data() which extracts course ratings from the rating table.
+
+Instructions
+
+- Complete the transform_avg_rating() function by grouping by the course_id column, and taking the mean of the rating column.
+- Use extract_rating_data() to extract raw ratings data. It takes in as argument the database engine db_engines.
+- Use transform_avg_rating() on the raw rating data you've extracted.
 
