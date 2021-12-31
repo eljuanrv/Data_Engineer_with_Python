@@ -613,8 +613,8 @@ pd.read_sql("SELECT film_id, recommended_film_ids FROM store.film", db_engine_dw
 
 #### The ETL Function
 
-
 ```Py
+
 def extract_table_to_df(tablename, db_engine):
 	return pd.read_sql('SELECT * FROM {}'.format(tablename), db_engine)
 
@@ -631,7 +631,61 @@ def etl():
 	# transform
 	film_df = split_columns_transform(film_df, 'rental_rate', '.', ['_dollar', '_cents'])
 	#load
-	load_df_into_dwh(film_df, 'film', 'store', db_engines['dwh'])
-```	
+	load_df_into_dwh(film_df, 'film', 'store', db_engines['dwh'])	
+```
 
 #### Arflow Refresher
+We need to be sure that this function runs at a specific time 
+
+**Scheduling with DAGs in Airflow**
+```Py
+from airflow.models import DAG 
+
+dag = DAG(
+	dag_id = 'sample',
+	...,
+	schedule_interval = '0 0 * * *') # cron, runs every 0th minute in the hour
+'''
+ cron example
+ .------------------------------- minute           (0-59)
+ | .----------------------------- hour             (0-23)
+ | | .--------------------------- day of the month (1-31)
+ | | | .------------------------- month            (1-12)
+ | | | | .----------------------- day of the week  (0-6)
+ * * * * * <command>
+
+Example
+0 * * * * # Every hour at the 0th minute
+'''
+```
+[More information about cron](https://crontab.guru)
+
+Having creating the DAG is timme to set the ETL into motion
+
+```Py
+from airflow.models import DAG 
+from airflow.operators.python_operator import PythonOperator # we are going to use a Python operator function 
+
+dag = DAG(
+	dag_id = 'sample',
+	...,
+	schedule_interval = '0 0 * * *') # cron, runs every 0th minute in the hour
+	
+# the python operator expects a callable in this case is the function we defined before
+# it also expects two other parameters, task_id and dag, these are standar for all operathors
+etl_task = PythonOperator(
+	task_id = 'etl_task', # the identifier of this task
+	python_callable = etl,
+	dag = dag) # and the DAG it belogs to
+
+etl_task.set_upstream(wait_for_this_task)# we set upstream or downstream dependencies between tasks
+# we can use set_upstream or set_downstream
+
+# with upstream the etl_task will run after wait_for_this_task is completed
+
+# Now we can write it into a Python file and place it in the DAG folder
+# of Airflow
+#the service detects the DAG and shows it in the interface
+```
+
+
