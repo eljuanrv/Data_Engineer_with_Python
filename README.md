@@ -1,6 +1,11 @@
 # Data_Engineer_with_Python
 Este repositorio es para llevar el seguimiento del curso de Data Engineer with Python que estoy tomando en Data Camp
+
+
 ## INTRODUCCION A LA INGENIERIA DE DATOS
+
+[Introduction to Data Engineering](https://app.datacamp.com/learn/courses/introduction-to-data-engineering)
+
 ### Herramientas del Ingeniero de Datos
 Un ingeniero de datos ueve datos de diferents fuentes, procesos o los limpia y finalmnte los carga en una base de datos anaitica.
 Hace eso utilizando varias herramientas 
@@ -906,4 +911,148 @@ def transform_recommendations(avg_course_ratings, courses_to_recommend):
 # Use the function with the predefined DataFrame objects
 recommendations = transform_recommendations(avg_course_ratings, courses_to_recommend)
 ```
+#### Scheduling Dayli Jobs
 
+**What you've done so far?**
+- Extract using *extract_course_data()* and *extract_rating_data()*
+- Clean up using NA using *transform_fill_programming_language*
+- Average course ratings per course: *transform_avg_rating()*
+- Get eligible user and course id pairs: *transform_courses_to_recomend()*
+- Calculate the *recommendations: transform_recommendations()*
+
+#### Loading to Postgres
+- Use the calculations in data products
+- Update daily
+- Example use case: sending out e-mails with recommendations
+
+#### The loading phase
+```Py
+recommendations.to_sql(
+	'recommendations',
+	db_engine,
+	if_exists = 'append'
+	)
+```
+
+#### Final ETL Function
+```Py
+def etl(db_engines):
+	# Extract the data
+	courses=extract_course_data(db_engines)
+	rating=extract_rating_data(db_engines)
+	# Clean up courses data
+	courses= transform_fill_programming_language(courses)
+	# Get the average course ratings
+	avg_course_ratings=transform_avg_rating(rating)
+	# Get elegible user and course id pairs
+	courses_to_recommend=transform_courses_to_recommend(
+	rating,
+	courses
+	)
+	# Calculate the recommendations
+	recommendations=transform_recommendations(
+	avg_course_rating,
+	courses_to_recommend
+	)
+	#Load the recommendations into the database
+	load_to_dwh(recommendations, db_engine)
+```
+
+#### Creating The Dag
+```Py
+# We are going to execute the function that we just created daily
+
+from airflow.models import DAG
+from airflow.operators.python_operator import PythonOperator
+
+dag = DAG(
+	dag_id='recommendations',
+	scheduled_interval = '0 0 * * *'
+	)
+task_recommendations=PythonOperator(
+	task_id='recommendations_task',
+	python_callable=etl
+	)
+```
+
+**Exercise 1: The target table**
+In the previous exercises, you've calculated a DataFrame called recommendations. It contains pairs of user_id's' and course_id's, with a rating that represents the average rating of this course. The assumption is the highest rated course, which is eligible for a user would be best to recommend.
+
+It's time to put this table into a database so that it can be used by several products like a recommendation engine or an emailing system.
+
+Since it's a pandas.DataFrame object, you can use the .to_sql() method. Of course, you'll have to connect to the database using the connection URI first. The recommendations table is available in your environment.
+
+Instructions
+
+- Fill in the connection URI for the Postgres database on host localhost with port 5432. You can connect with user repl and password password. The database name is dwh.
+- Complete the load_to_dwh() function. It should write to the "recommendations" table and replace the table if it already exists.
+```Py
+connection_uri = "postgresql://repl:password@localhost:5432/dwh"
+db_engine = sqlalchemy.create_engine(connection_uri)
+
+def load_to_dwh(recommendations):
+    recommendations.to_sql("recommendations", db_engine, if_exists="replace")   
+```
+**Exercise 2: Defining the DAG**
+
+In the previous exercises, you've completed the extract, transform and load phases separately. Now all of this is put together in one neat etl() function that you can discover in the console.
+
+The etl() function extracts raw course and ratings data from relevant databases, cleans corrupt data and fills in missing value, computes average rating per course and creates recommendations based on the decision rules for producing recommendations, and finally loads the recommendations into a database.
+
+As you might remember from the video, etl() accepts a single argument: db_engines. You can pass this to the task using op_kwargs in the PythonOperator. You can pass it a dictionary that will be filled in as kwargs in the callable.
+
+Instructions
+
+- Complete the DAG definition, so it runs daily. Make sure to use the cron notation.
+- Complete the PythonOperator() by passing the correct arguments. Other than etl, db_engines is also available in your workspace
+```Py
+# Define the DAG so it runs on a daily basis
+dag = DAG(dag_id="recommendations",
+          schedule_interval="0 0 * * *")
+
+# Make sure `etl()` is called in the operator. Pass the correct kwargs.
+task_recommendations = PythonOperator(
+    task_id="recommendations_task",
+    python_callable=etl,
+    op_kwargs={"db_engines": db_engines},
+)
+```
+
+**Exercise 3: Ennable The DAG**
+
+It's time to enable the DAG you just created, so it can start running on a daily schedule.
+
+To the right you can find the Airflow interface. The DAG you created is called recommendations.
+
+Can you find how to enable the DAG?
+
+- By switching the left-hand slide from `Off` to `On`.
+
+**Exercise 4: Querying the recommendations**
+
+In the previous exercises, you've learned how to calculate a table with course recommendations on a daily basis. Now that this recommendations table is in the data warehouse, you could also quickly join it with other tables in order to produce important features for DataCamp students such as customized marketing emails, intelligent recommendations for students and other features.
+
+In this exercise, you will get a taste of how the newly created recommendations table could be utilized by creating a function recommendations_for_user() which automatically gets the top recommended courses based per user ID for a particular rating threshold.
+
+Instructions
+
+- Complete the query in the recommendations_for_user() function definition. It should join the courses table.
+- Complete the read_sql() function in recommendations_for_user(). The params argument is incomplete: it's missing a threshold.
+- Run the recommendations_for_user() function you defined in the last statements and observe the results.
+```Py
+def recommendations_for_user(user_id, threshold=4.5):
+    # Join with the courses table
+    query = """
+    SELECT title, rating FROM recommendations
+    INNER JOIN courses ON courses.course_id = recommendations.course_id
+    WHERE user_id=%(user_id)s AND rating>%(threshold)s
+    ORDER BY rating DESC
+    """
+    # Add the threshold parameter
+    predictions_df = pd.read_sql(query, db_engine, params = {"user_id": user_id, 
+                                                             "threshold": threshold})
+    return predictions_df.title.values
+
+# Try the function you created
+print(recommendations_for_user(12, 4.65))
+```
